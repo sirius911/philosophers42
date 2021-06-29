@@ -12,53 +12,85 @@
 
 #include "../includes/philo.h"
 
-int increment(int i) {
-  return i+1;
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <unistd.h>
+
+#define PHILOSOPHES 3
+
+pthread_t phil[PHILOSOPHES];
+pthread_mutex_t baguette[PHILOSOPHES];
+
+void mange(int id) {
+  printf("Philosophe [%d] mange ",id);
+usleep(500);
+  printf("\n");
 }
 
-void *func(void * param) {
-  int err;
-  (void) param;
-  for(int j=0;j<1000000;j++) {
-    err=pthread_mutex_lock(&mutex_global);
-    if(err!=0)
-      printf("pthread_mutex_lock error = %d\t", err);
-    global=increment(global);
-    err=pthread_mutex_unlock(&mutex_global);
-    if(err!=0)
-    	printf("pthread_mutex_unlock error = %d\t", err);
+void* philosophe ( void* arg )
+{
+  int *id=(int *) arg;
+  int left = *id;
+  int right = (left + 1) % PHILOSOPHES;
+  while(true) {
+    // philosophe pense
+    printf("Philosophe [%d] ", *id);
+    if(left<right) {
+      printf("prend left[%d] ", left);
+      pthread_mutex_lock(&baguette[left]);
+      printf("ok\n");
+      printf("prend right[%d] ", right);
+      pthread_mutex_lock(&baguette[right]);
+      printf("ok\n");
+    }
+    else {
+      printf("prend right[%d] ", right);
+      pthread_mutex_lock(&baguette[right]);
+      printf("ok\n");
+      printf("prend left[%d] ", left);
+      pthread_mutex_lock(&baguette[left]);
+      printf("ok\n");
+    }
+    mange(*id);
+    printf("libere left[%d]\n", left);
+    pthread_mutex_unlock(&baguette[left]);
+    printf("libere right[%d]\n", right);
+    pthread_mutex_unlock(&baguette[right]);
   }
-  return(NULL);
+  return (NULL);
 }
 
-int main (int argc, char *argv[])  {
-  pthread_t thread[NTHREADS];
-  int err;
-  (void)argc;
-  (void)argv;
+int main ( int argc, char *argv[])
+{
+  (void) argc;
+  (void) argv;
+   long i;
+   int id[PHILOSOPHES];
 
-  err=pthread_mutex_init( &mutex_global, NULL);
-  if(err!=0)
-  	printf("pthread_mutex_init error = %d\t", err);
+   srand(getpid());
 
-  for(int i=0;i<NTHREADS;i++) {
-    err=pthread_create(&(thread[i]),NULL,&func,NULL);
-    if(err!=0)
-    	printf("pthread_create error = %d\t", err);
-  }
-  for(int i=0; i<1000000000;i++) { /*...*/ }
+   for (i = 0; i < PHILOSOPHES; i++)
+   {
+      id[i]=i;
+      printf("id[%ld]=%d\n", i, id[i]);
+   }
 
-  for(int i=NTHREADS-1;i>=0;i--) {
-    err=pthread_join(thread[i],NULL);
-    if(err!=0)
-    	printf("pthread_join error = %d\t", err);
-  }
+   for (i = 0; i < PHILOSOPHES; i++)
+   {
+      pthread_mutex_init( &baguette[i], NULL);
+      printf("mutex_init(%ld)\n", i);
+   }
 
-  err=pthread_mutex_destroy(&mutex_global);
-  if(err!=0)
-  	printf("pthread_mutex_destroy error = %d\t", err);
+   for (i = 0; i < PHILOSOPHES; i++)
+   {
+     pthread_create(&phil[i], NULL, philosophe, (void*)&(id[i]) );
+      printf("pthread_create(%ld)\n", i);
+   }
 
-  printf("global: %ld\n",global);
+   for (i = 0; i < PHILOSOPHES; i++)
+      pthread_join(phil[i], NULL);
 
-  return(0);
+   return (EXIT_SUCCESS);
 }

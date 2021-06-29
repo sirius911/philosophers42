@@ -16,8 +16,12 @@
 # include <pthread.h>
 # include <stdio.h>
 
-# define NTHREADS 10
-long global=0;
-pthread_mutex_t mutex_global;
+// #define PHILOSOPHES 3
+
+// typedef struct s_table
+// {
+// 	pthread_t phil[PHILOSOPHES];
+// 	pthread_mutex_t baguette[PHILOSOPHES];	
+// }				t_table;
 
 #endif

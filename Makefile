@@ -20,6 +20,8 @@ FLAGS	= -Wall -Werror -Wextra
 
 HEADER	= -I includes/
 
+LIBS	= -lpthread
+
 OBJ	= $(SRCS:.c=.o)
 
 all:	$(NAME)
@@ -29,7 +31,7 @@ all:	$(NAME)
 	@$(CC) $(FLAGS) $(HEADER) -c $< -o $(<:.c=.o)
 
 $(NAME): $(OBJ)
-	@$(CC) $(FLAGS) $(HEADER) $(OBJ) -o $(NAME)
+	@$(CC) $(FLAGS) $(HEADER) $(OBJ) -o $(NAME) $(LIBS)
 
 clean:	
 	@rm -rf $(OBJ)
