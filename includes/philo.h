@@ -15,13 +15,48 @@
 
 # include <pthread.h>
 # include <stdio.h>
+# include <unistd.h>
+# include <stdlib.h>
+# include <sys/time.h>
 
-// #define PHILOSOPHES 3
+# define FALSE 0
+# define TRUE 1
 
-// typedef struct s_table
-// {
-// 	pthread_t phil[PHILOSOPHES];
-// 	pthread_mutex_t baguette[PHILOSOPHES];	
-// }				t_table;
+typedef enum	e_state
+{
+	EATING,
+	SLEEPING,
+	THINKING,
+	DEAD
+}				t_state;
+
+typedef struct	s_philosophe
+{
+	int				num;
+	int				state;
+	int				t_die;
+	int				t_eat;
+	int				t_sleep;
+	int				meal_taken;
+	int				nb_meal;
+	long			start_eat;
+	pthread_mutex_t	*printer;
+}				t_philosophe;
+
+typedef struct	s_table
+{
+	int				nb_philo;
+	int				nb_forks;
+	int				t_die;
+	int				t_eat;
+	int				t_sleep;
+	int				nb_meal;
+	t_philosophe	*philo;
+	pthread_mutex_t	*forks;
+	pthread_mutex_t	printer;
+}				t_table;
+
+int ft_is_nbr(const char *str);
+int	ft_atoi(const char *str);
 
 #endif

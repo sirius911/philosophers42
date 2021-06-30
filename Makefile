@@ -12,7 +12,7 @@
 
 NAME	= philo
 
-SRCS	= srcs/main.c
+SRCS	= srcs/main.c srcs/utils.c
 
 CC	= clang
 
@@ -27,11 +27,12 @@ OBJ	= $(SRCS:.c=.o)
 all:	$(NAME)
 
 .c.o :	
-	@printf "\033[0;33mGenerating Philosopher's objects... %-33.33s\r" $@
-	@$(CC) $(FLAGS) $(HEADER) -c $< -o $(<:.c=.o)
+		@printf "\033[0;33mGenerating Philosopher's objects... %-33.33s\r" $@
+		@$(CC) $(FLAGS) $(HEADER) -c $< -o $(<:.c=.o)
 
 $(NAME): $(OBJ)
-	@$(CC) $(FLAGS) $(HEADER) $(OBJ) -o $(NAME) $(LIBS)
+		@$(CC) $(FLAGS) $(HEADER) $(OBJ) -o $(NAME) $(LIBS)
+		@echo "\nBuilding philo : \033[32mOK\033[0m"
 
 clean:	
 	@rm -rf $(OBJ)
