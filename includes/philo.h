@@ -18,6 +18,7 @@
 # include <unistd.h>
 # include <stdlib.h>
 # include <sys/time.h>
+# include <errno.h>
 
 # define FALSE 0
 # define TRUE 1
@@ -38,9 +39,13 @@ typedef struct	s_philosophe
 	int				t_eat;
 	int				t_sleep;
 	int				meal_taken;
+	int				*nb_finished_meal;
 	int				nb_meal;
+	long			birthday;
 	long			start_eat;
 	pthread_mutex_t	*printer;
+	pthread_mutex_t *left_fork;
+	pthread_mutex_t *right_fork;
 }				t_philosophe;
 
 typedef struct	s_table
@@ -51,12 +56,16 @@ typedef struct	s_table
 	int				t_eat;
 	int				t_sleep;
 	int				nb_meal;
+	int				nb_finished_meal;
 	t_philosophe	*philo;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	printer;
 }				t_table;
 
-int ft_is_nbr(const char *str);
-int	ft_atoi(const char *str);
+int 	ft_is_nbr(const char *str);
+int		ft_atoi(const char *str);
+long	split_time(long starter);
+long  	get_time();
+void	*routine(void *data);
 
 #endif

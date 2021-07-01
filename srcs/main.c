@@ -40,22 +40,29 @@ void  free_philo(t_table *table)
     free(table->philo);
 }
 
-long  split_time(long starter)
+int  free_mutex(t_table *table)
 {
-    struct timeval  tv;
-    long            end;
+  int i;
 
-    gettimeofday(&tv, NULL);
-    end = ((tv.tv_sec * 1000) + tv.tv_usec / 1000);
-    return (end - starter);
+  pthread_mutex_unlock(&table->printer);
+  pthread_mutex_destroy(&table->printer);
+  i = 0;
+  while (i < table->nb_forks)
+  {
+    if (pthread_mutex_destroy(&table->forks[i]) == EBUSY)
+    {
+      pthread_mutex_unlock(&table->forks[i]);
+      pthread_mutex_destroy(&table->forks[i]);
+    }
+    i++;
+  }
+  return (FALSE);
 }
 
 int init_table(t_table *table, char **argv, int limit_nb_eat)
 {
   table->nb_philo = ft_atoi(argv[1]);
   table->nb_forks = table->nb_philo;
-  if (table->nb_forks == 1)
-    table->nb_forks++;
   table->t_die = ft_atoi(argv[2]);
   table->t_eat = ft_atoi(argv[3]);
   table->t_sleep = ft_atoi(argv[4]);
@@ -63,16 +70,22 @@ int init_table(t_table *table, char **argv, int limit_nb_eat)
     table->nb_meal = ft_atoi(argv[5]);
   else
     table->nb_meal = 0;
-
-  if (pthread_mutex_init(&table->printer, NULL) != 0)
-  {
-    printf("Error\nInit mutex error\n");
-    return (FALSE); //to do delete_mutexes(philo_data)
-  }
-  // init philosphers
+  table->nb_finished_meal = 0;
+  table->philo = NULL;
+  table->forks = NULL;
+  
+  // malloc
   table->philo = (t_philosophe *) malloc(sizeof(t_philosophe) * table->nb_philo);
   if (!table->philo)
     return (FALSE);
+  table->forks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * table->nb_forks);
+  if (!table->forks)
+  {
+    free_philo(table);
+    return (FALSE);
+  }
+  // init philosphers
+  
   int i = 0;
   while (i < table->nb_philo)
   {
@@ -82,26 +95,53 @@ int init_table(t_table *table, char **argv, int limit_nb_eat)
     table->philo[i].t_sleep = table->t_sleep;
     table->philo[i].nb_meal = table->nb_meal;
     table->philo[i].meal_taken = 0;
+    table->philo[i].nb_finished_meal = &table->nb_finished_meal;
     table->philo[i].state = THINKING;
     table->philo[i].printer = &table->printer;
-    table->philo[i].start_eat = split_time(0);
+    table->philo[i].left_fork = &table->forks[i];
+    // si 1 seul philosophe ?
+    if (i == 0)
+      table->philo[i].right_fork = &table->forks[table->nb_philo - 1];
+    else
+      table->philo[i].right_fork = &table->forks[i - 1];
     i++;
   }
   //init forks
-  table->forks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * table->nb_forks);
-  if (!table->forks)
-  {
-    free_philo(table);
-    return (FALSE);
-  }
+  
   i = 0;
   while (i < table->nb_forks)
   {
     if (pthread_mutex_init(&table->forks[i], NULL) != 0)
     {
       printf("Error\nInit mutex error\n");
-      return (FALSE); //to do delete_mutexes(philo_data));
+      return (free_mutex(table));
     }
+    i++;
+  }
+
+  if (pthread_mutex_init(&table->printer, NULL) != 0)
+  {
+    printf("Error\nInit mutex error\n");
+    return (free_mutex(table));
+  }
+  return (TRUE);
+}
+
+int run_philo(t_table *table)
+{
+  int   i;
+  pthread_t thread;
+  t_philosophe *philosophe;
+
+  i = 0;
+  while (i < table->nb_philo)
+  {
+    philosophe = &table->philo[i];
+    //printf("pthread_create(philo[%d]...", philosophe->num);
+    pthread_create(&thread, NULL, &routine, (void *)philosophe);
+    //printf("ok\n");
+    // TODO Controle
+    pthread_detach(thread);
     i++;
   }
   return (TRUE);
@@ -123,9 +163,14 @@ int main ( int argc, char **argv)
     printf("%d philosopher(s) with %d forks\n", table.nb_philo, table.nb_forks);
     printf("time to die = %d ms, time to eat = %d ms, time to sleep = %d ms, nb meal = %d \n", table.t_die, table.t_eat, table.t_sleep, table.nb_meal);
     for (int i = 0; i < table.nb_philo; i++)
-      printf("philo[%d], state = %d\n", table.philo[i].num, table.philo[i].state);
+      printf("philo[%d], right = %p left = %p\n", table.philo[i].num, table.philo[i].right_fork, table.philo[i].left_fork);
+    run_philo(&table);
+    while (table.nb_finished_meal < table.nb_philo)
+        ;
     printf("free_philo...");
     free_philo(&table);
+    free_mutex(&table);
+    free(table.forks);
     printf("ok\n");
   }
   else
