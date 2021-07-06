@@ -31,3 +31,17 @@ long  get_time()
   end = ((tv.tv_sec * 1000) + tv.tv_usec / 1000);
     return (end); 
 }
+
+void  ft_usleep(int duration)
+{
+  long start;
+  long current;
+
+  start = split_time(0);
+  current = start;
+  while (duration > current - start)
+  {
+    usleep(100);
+    current = split_time(0);
+  }
+}
