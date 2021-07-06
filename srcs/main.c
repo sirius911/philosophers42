@@ -101,16 +101,9 @@ int init_table(t_table *table, char **argv, int limit_nb_eat)
   {
     table->philo[i].num = i + 1;
     table->philo[i].table = table;
-//    table->philo[i].t_die = table->t_die;
-//    table->philo[i].t_eat = table->t_eat;
-//    table->philo[i].t_sleep = table->t_sleep;
-//    table->philo[i].nb_meal = table->nb_meal;
     table->philo[i].meal_taken = 0;
-//    table->philo[i].nb_finished_meal = &table->nb_finished_meal;
     table->philo[i].state = THINKING;
-//    table->philo[i].printer = &table->printer;
     table->philo[i].left_fork = &table->forks[i];
-    // si 1 seul philosophe ?
     if (i == 0)
       table->philo[i].right_fork = &table->forks[table->nb_philo - 1];
     else
@@ -151,31 +144,18 @@ int run_philo(t_table *table)
   t_philosophe *philosophe;
 
   i = 0;
+  table->start_time = get_time();
   while (i < table->nb_philo)
   {
     philosophe = &table->philo[i];
-    //printf("pthread_create(philo[%d]...", philosophe->num);
+    philosophe->birthday = table->start_time;
     pthread_create(&thread, NULL, &routine, (void *)philosophe);
-    //printf("ok\n");
     // TODO Controle
     pthread_detach(thread);
     i++;
   }
   return (TRUE);
 }
-
-/*char    *etat(int etat_int)
-{
-    if (etat_int == EATING)
-        return (" is eating\n");
-    else if (etat_int == SLEEPING)
-        return (" is sleeping\n");
-    else if (etat_int == THINKING)
-        return (" is thinking\n");
-    else
-        return (" dead\n");
-}*/
-
 
 void ending_philo(t_table *table)
 {
@@ -193,25 +173,27 @@ void ending_philo(t_table *table)
 void  loop_death(t_table *table)
 {
   while (!table->a_philo_is_dead)
-   ;
+  {
+   usleep(500);
+  }
   ending_philo(table);
 }
 
 void  loop_nb_meal(t_table *table)
 {
+  int   dead;
+
+  dead = FALSE;
   while (!table->a_philo_is_dead
     && table->nb_finished_meal < table->nb_philo)
-    ;
-  if (table->nb_finished_meal == table->nb_philo && !table->a_philo_is_dead)
-      printf("All philosophers eat there meal !\n");
-  else
-  {
-    pthread_mutex_lock(&table->printer);
-    printf("repas finis = %d\n", table->nb_finished_meal);
-    pthread_mutex_unlock(&table->printer);
-    
-  }
+    {
+      usleep(500);
+    }
+  dead = table->a_philo_is_dead;
+  table->a_philo_is_dead = TRUE;
   ending_philo(table);
+  if (table->nb_finished_meal == table->nb_philo && !dead)
+      printf("All philosophers ate %d meal(s) !\n", table->nb_meal);
 }
 
 int main ( int argc, char **argv)
@@ -225,22 +207,12 @@ int main ( int argc, char **argv)
       return (EXIT_FAILURE);
     if (!init_table(&table, argv, argc == 6))
       return (EXIT_FAILURE);
-    //printf("init table ... ok\n");
-    //printf("%d philosopher(s) with %d forks\n", table.nb_philo, table.nb_forks);
-    //printf("time to die = %d ms, time to eat = %d ms, time to sleep = %d ms, nb meal = %d \n", table.t_die, table.t_eat, table.t_sleep, table.nb_meal);
-    //for (int i = 0; i < table.nb_philo; i++)
-    //  printf("philo[%d], right = %p left = %p\n", table.philo[i].num, table.philo[i].right_fork, table.philo[i].left_fork);
     run_philo(&table);
     if (table.nb_meal > 0)
       loop_nb_meal(&table);
     else
       loop_death(&table);
-    
-    write(1, "--------\n", 10);
-
    //sleep(2);
-    
-    //printf("free_philo...");
     free_philo(&table);
     free_mutex(&table);
     free_forks(&table);
@@ -256,6 +228,5 @@ int main ( int argc, char **argv)
     printf("[nb_eat]: (optional) Number of time each philosophers must eat\n");
     return (EXIT_FAILURE);
   }
- printf("time = %ld ms\n", split_time(start));
   return (EXIT_SUCCESS);
 }

@@ -60,6 +60,7 @@ typedef struct	s_table
 	int				option_nb_meal;
 	int				nb_finished_meal;
 	int				a_philo_is_dead;
+	long			start_time;
 	t_philosophe	*philo;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	printer;
