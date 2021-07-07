@@ -27,7 +27,8 @@ static void *control_death(void *data)
             if ((philo->table->t_die < ts - philo->start_eat)
                 && philo->state != EATING)
             {
-             print_philo(ts, philo->num, "\033[31m died\033[0m\n", philo);
+                if (!philo->table->a_philo_is_dead)
+                    print_philo(ts, philo->num, "\033[31m died\033[0m\n", philo);
              philo->state = DEAD;
              philo->table->a_philo_is_dead = TRUE;
              break ;

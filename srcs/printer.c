@@ -71,7 +71,8 @@ void	print_philo(long ts, int num, char *msg, t_philosophe *philo)
 			str[i++] = msg[j++];
 		str[i] = '\0';
 		pthread_mutex_lock(&philo->table->printer);
-		write (1, str, i);
+		if (!philo->table->a_philo_is_dead)
+			write (1, str, i);
 		pthread_mutex_unlock(&philo->table->printer);
 		free (str_num);
 		free (str_ts);
