@@ -112,10 +112,12 @@ void  *routine(void *data)
   pthread_t     death_control;
 
   philo = (t_philosophe *)data;
-  //philo->birthday = get_time();
   philo->start_eat = 0;
-  pthread_create(&death_control, NULL, &control_death, philo);
-  // todo gestion erreur de pthread_create
+  if (pthread_create(&death_control, NULL, &control_death, philo))
+  {
+    printf("Error\n creating pthread\n");
+    return ((void *)1);
+  }
   pthread_detach(death_control);
   if (philo->table->option_nb_meal)
   {
@@ -126,7 +128,6 @@ void  *routine(void *data)
         thinking(philo);
         usleep(100);
     }
-
    }
    else
    {

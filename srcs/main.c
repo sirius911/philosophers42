@@ -67,6 +67,14 @@ int  free_mutex(t_table *table)
   return (FALSE);
 }
 
+int delete_table(t_table *table)
+{
+  free_mutex(table);
+  free_forks(table);
+  free_philo(table);
+  return (FALSE);
+}
+
 int init_table(t_table *table, char **argv, int limit_nb_eat)
 {
   table->nb_philo = ft_atoi(argv[1]);
@@ -149,8 +157,8 @@ int run_philo(t_table *table)
   {
     philosophe = &table->philo[i];
     philosophe->birthday = table->start_time;
-    pthread_create(&thread, NULL, &routine, (void *)philosophe);
-    // TODO Controle
+    if (pthread_create(&thread, NULL, &routine, (void *)philosophe) != 0)
+      return (delete_table(table));
     pthread_detach(thread);
     i++;
   }
@@ -212,10 +220,8 @@ int main ( int argc, char **argv)
       loop_nb_meal(&table);
     else
       loop_death(&table);
-   //sleep(2);
-    free_philo(&table);
-    free_mutex(&table);
-    free_forks(&table);
+   sleep(2);
+    delete_table(&table);
   }
   else
   {
