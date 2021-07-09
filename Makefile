@@ -12,7 +12,8 @@
 
 NAME	= philo
 
-SRCS	= srcs/main.c srcs/utils.c srcs/routine.c srcs/timer.c srcs/printer.c
+SRCS	= srcs/main.c srcs/utils.c srcs/routine.c srcs/timer.c srcs/printer.c \
+			srcs/death.c srcs/free.c srcs/check.c srcs/init.c
 
 CC	= clang
 

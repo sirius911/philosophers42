@@ -21,40 +21,40 @@ static int	ft_isspace(int ch)
 		return (FALSE);
 }
 
-static int ft_isdigit(int ch)
+static int	ft_isdigit(int ch)
 {
-  if (ch >= '0' && ch <= '9')
-    return (TRUE);
-  else
-    return (FALSE);
+	if (ch >= '0' && ch <= '9')
+		return (TRUE);
+	else
+		return (FALSE);
 }
 
-int ft_is_nbr(const char *str)
+int	ft_is_nbr(const char *str)
 {
-  int i;
+	int	i;
 
-  i = 0;
-  if (!str || !*str)
-    return (FALSE);
-  while (str[i])
-  {
-    if (str[i] == '+' || str[i] == '-')
-      i++;
-    else
-      break ;
-  }
-  while (str[i])
-  {
-    if (!ft_isdigit(str[i]))
-      return (FALSE);
-    i++;
-  }
-  return (TRUE);
+	i = 0;
+	if (!str || !*str)
+		return (FALSE);
+	while (str[i])
+	{
+		if (str[i] == '+' || str[i] == '-')
+			i++;
+		else
+			break ;
+	}
+	while (str[i])
+	{
+		if (!ft_isdigit(str[i]))
+			return (FALSE);
+		i++;
+	}
+	return (TRUE);
 }
 
 int	ft_atoi(const char *str)
 {
-	long int	result;
+	long		result;
 	int			sign;
 	int			i;
 

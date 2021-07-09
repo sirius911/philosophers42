@@ -46,34 +46,41 @@ char	*ft_itoa(long n)
 	return (str);
 }
 
+static void	ft_print(char *str_ts, char *str_num, char *msg,
+	t_philosophe *philo)
+{
+	char	str[100];
+	int		i;
+	int		j;
+
+	j = 0;
+	i = 0;
+	while (str_ts[j])
+		str[i++] = str_ts[j++];
+	str[i++] = ' ';
+	j = 0;
+	while (str_num[j])
+		str[i++] = str_num[j++];
+	j = 0;
+	while (msg[j])
+		str[i++] = msg[j++];
+	str[i] = '\0';
+	pthread_mutex_lock(&philo->table->printer);
+	if (!philo->table->a_philo_is_dead)
+		write (1, str, i);
+	pthread_mutex_unlock(&philo->table->printer);
+}
+
 void	print_philo(long ts, int num, char *msg, t_philosophe *philo)
 {
-	char		str[100];
 	char		*str_ts;
 	char		*str_num;
-	int			i;
-	int			j;
 
 	if (philo->state != DEAD && !philo->table->a_philo_is_dead)
 	{
-		i = 0;
 		str_num = ft_itoa(num);
 		str_ts = ft_itoa(ts);
-		j = 0;
-		while (str_ts[j])
-			str[i++] = str_ts[j++];
-		str[i++] = ' ';
-		j = 0;
-		while (str_num[j])
-			str[i++] = str_num[j++];
-		j = 0;
-		while (msg[j])
-			str[i++] = msg[j++];
-		str[i] = '\0';
-		pthread_mutex_lock(&philo->table->printer);
-		if (!philo->table->a_philo_is_dead)
-			write (1, str, i);
-		pthread_mutex_unlock(&philo->table->printer);
+		ft_print(str_ts, str_num, msg, philo);
 		free (str_num);
 		free (str_ts);
 	}
