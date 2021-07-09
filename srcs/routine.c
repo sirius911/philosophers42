@@ -19,9 +19,15 @@ static void	take_forks(t_philosophe *philo)
 		pthread_mutex_lock(philo->right_fork);
 		print_philo(split_time(philo->birthday),
 			philo->num, "\033[33m has taken a fork\033[0m\n", philo);
-		pthread_mutex_lock(philo->left_fork);
-		print_philo(split_time(philo->birthday),
-			philo->num, "\033[33m has taken a fork\033[0m\n", philo);
+		if (philo->table->nb_philo == 1)
+			while (philo->state != DEAD)
+				;
+		else
+		{
+			pthread_mutex_lock(philo->left_fork);
+			print_philo(split_time(philo->birthday),
+				philo->num, "\033[33m has taken a fork\033[0m\n", philo);
+		}
 	}
 	else
 	{
