@@ -19,6 +19,9 @@
 # include <sys/time.h>
 # include <errno.h>
 # include <limits.h>
+# include <semaphore.h>
+# include <fcntl.h>
+# include <signal.h>
 
 # define FALSE 0
 # define TRUE 1
@@ -39,8 +42,8 @@ typedef struct s_philosophe
 	int				meal_taken;
 	long			birthday;
 	long			start_eat;
-	pthread_mutex_t	*left_fork;
-	pthread_mutex_t	*right_fork;
+	//pthread_mutex_t	*left_fork;
+	//pthread_mutex_t	*right_fork;
 	struct s_table	*table;
 }				t_philosophe;
 
@@ -56,9 +59,10 @@ typedef struct s_table
 	int				a_philo_is_dead;
 	long			start_time;
 	t_philosophe	*philo;
-	pthread_mutex_t	*forks;
+	//pthread_mutex_t	*forks;
+	t_pid			*philo_pid;
 	pthread_mutex_t	printer;
-	pthread_mutex_t	finished_meal;
+	pthread_mutex_t	finished_flag;
 }				t_table;
 
 int		ft_is_nbr(const char *str);
