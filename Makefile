@@ -17,7 +17,10 @@ BONUS		= philo_bonus
 SRCS		= srcs/main.c srcs/utils.c srcs/routine.c srcs/timer.c srcs/printer.c \
 			srcs/death.c srcs/free.c srcs/check.c srcs/init.c
 
-SRCS_BONUS	= bonus/main_bonus.c
+SRCS_BONUS	= bonus/main_bonus.c bonus/check_bonus.c bonus/utils_bonus.c \
+			bonus/timer_bonus.c bonus/init_bonus.c bonus/free_bonus.c \
+			bonus/semaphores.c bonus/routine_bonus.c bonus/printer_bonus.c \
+			bonus/death_bonus.c
 
 CC	= clang
 
@@ -45,13 +48,14 @@ $(NAME): $(OBJ)
 
 $(BONUS): $(OBJ_BONUS)
 		@$(CC) $(FLAGS) $(HEADER) $(OBJ_BONUS) -o $(BONUS) $(LIBS)
+		@echo "\nBuilding philo with bonus: \033[32mOK\033[0m"
 
 clean:	
-	@rm -rf $(OBJ)
+	@rm -rf $(OBJ) $(OBJ_BONUS)
 	@echo "Delete OBJ files : \033[32mOK\033[0m"
 
 fclean:	clean
-	@rm -rf $(NAME)
+	@rm -rf $(NAME) $(BONUS)
 	@echo "Delete philosopher : \033[32mOK\033[0m"
 
 re:	fclean all
