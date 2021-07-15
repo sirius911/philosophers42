@@ -39,9 +39,23 @@ static void	ending_philo(t_table *table)
 	i = 0;
 	while (i < table->nb_philo)
 	{
-		*(&table->philo[i].state) = DEAD;
+		*(&table->philo[i].stop) = TRUE;
 		i++;
 	}
+}
+
+static int	a_philo_is_dead(t_table *table)
+{
+	int	i;
+
+	i = 0;
+	while (i < table->nb_philo)
+	{
+		if (table->philo[i].state == DEAD)
+			return (TRUE);
+		i++;
+	}
+	return (FALSE);
 }
 
 static void	main_loop(t_table *table)
@@ -49,13 +63,12 @@ static void	main_loop(t_table *table)
 	int	dead;
 
 	dead = FALSE;
-	while (!table->a_philo_is_dead
+	while (!dead
 		&& table->nb_finished_meal < table->nb_philo)
 	{
+		dead = a_philo_is_dead(table);
 		usleep(T_MIN);
 	}
-	dead = table->a_philo_is_dead;
-	table->a_philo_is_dead = TRUE;
 	ending_philo(table);
 	if (table->nb_finished_meal == table->nb_philo && !dead)
 		printf("All philosophers ate %d meal(s) !\n", table->nb_meal);

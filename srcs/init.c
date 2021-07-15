@@ -23,6 +23,7 @@ static void	init_philo(t_table *table)
 		table->philo[i].table = table;
 		table->philo[i].meal_taken = 0;
 		table->philo[i].state = THINKING;
+		table->philo[i].stop = FALSE;
 		table->philo[i].left_fork = &table->forks[i];
 		if (i == 0)
 			table->philo[i].right_fork = &table->forks[table->nb_philo - 1];
@@ -37,7 +38,7 @@ static int	init_forks(t_table *table)
 	int	i;
 
 	i = 0;
-	if (pthread_mutex_init(&table->finished_meal, NULL) != 0)
+	if (pthread_mutex_init(&table->flag_finished_meal, NULL) != 0)
 	{
 		printf("Error\nInit mutex error\n");
 		return (free_mutex(table));
@@ -92,7 +93,6 @@ int	init_table(t_table *table, char **argv, int limit_nb_eat)
 	else
 		table->nb_meal = INT_MAX;
 	table->nb_finished_meal = 0;
-	table->a_philo_is_dead = FALSE;
 	table->philo = NULL;
 	table->forks = NULL;
 	if (!malloc_table(table))

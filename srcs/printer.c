@@ -66,7 +66,7 @@ static void	ft_print(char *str_ts, char *str_num, char *msg,
 		str[i++] = msg[j++];
 	str[i] = '\0';
 	pthread_mutex_lock(&philo->table->printer);
-	if (!philo->table->a_philo_is_dead)
+	if (!philo->stop)
 		write (1, str, i);
 	pthread_mutex_unlock(&philo->table->printer);
 }
@@ -76,7 +76,7 @@ void	print_philo(long ts, int num, char *msg, t_philosophe *philo)
 	char		*str_ts;
 	char		*str_num;
 
-	if (philo->state != DEAD && !philo->table->a_philo_is_dead)
+	if (philo->state != DEAD || !philo->stop)
 	{
 		str_num = ft_itoa(num);
 		str_ts = ft_itoa(ts);

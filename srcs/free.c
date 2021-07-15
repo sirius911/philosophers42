@@ -30,8 +30,8 @@ int	free_mutex(t_table *table)
 
 	pthread_mutex_unlock(&table->printer);
 	pthread_mutex_destroy(&table->printer);
-	pthread_mutex_unlock(&table->finished_meal);
-	pthread_mutex_destroy(&table->finished_meal);
+	pthread_mutex_unlock(&table->flag_finished_meal);
+	pthread_mutex_destroy(&table->flag_finished_meal);
 	i = 0;
 	while (i < table->nb_forks)
 	{

@@ -12,7 +12,7 @@
 
 #include "../includes/philo.h"
 
-static void	take_forks(t_philosophe *philo)
+static int	take_forks(t_philosophe *philo)
 {
 	if (philo->num % 2)
 	{
@@ -20,8 +20,7 @@ static void	take_forks(t_philosophe *philo)
 		print_philo(split_time(philo->birthday),
 			philo->num, "\033[33m has taken a fork\033[0m\n", philo);
 		if (philo->table->nb_philo == 1)
-			while (philo->state != DEAD)
-				;
+			return (waiting_death(philo));
 		else
 		{
 			pthread_mutex_lock(philo->left_fork);
@@ -38,42 +37,53 @@ static void	take_forks(t_philosophe *philo)
 		print_philo(split_time(philo->birthday),
 			philo->num, "\033[33m has taken a fork\033[0m\n", philo);
 	}
+	return (TRUE);
 }
 
 static void	eating(t_philosophe *philo)
 {
-	take_forks(philo);
-	philo->state = EATING;
-	philo->meal_taken++;
-	philo->start_eat = split_time(philo->birthday);
-	print_philo(philo->start_eat, philo->num,
-		"\033[32m is eating\033[0m\n", philo);
-	usleep(philo->table->t_eat * 1000);
-	pthread_mutex_unlock(philo->left_fork);
-	pthread_mutex_unlock(philo->right_fork);
-	if (philo->table->nb_meal == philo->meal_taken)
+	if (philo->state != DEAD && !philo->stop)
 	{
-		pthread_mutex_lock(&philo->table->finished_meal);
-		philo->table->nb_finished_meal = philo->table->nb_finished_meal + 1;
-		pthread_mutex_unlock(&philo->table->finished_meal);
+		if (take_forks(philo))
+		{
+			philo->state = EATING;
+			philo->meal_taken++;
+			philo->start_eat = split_time(philo->birthday);
+			print_philo(philo->start_eat, philo->num,
+				"\033[32m is eating\033[0m\n", philo);
+			usleep(philo->table->t_eat * 1000);
+			pthread_mutex_unlock(philo->left_fork);
+			pthread_mutex_unlock(philo->right_fork);
+			if (philo->table->nb_meal == philo->meal_taken)
+			{
+				pthread_mutex_lock(&philo->table->flag_finished_meal);
+				philo->table->nb_finished_meal
+					= philo->table->nb_finished_meal + 1;
+				pthread_mutex_unlock(&philo->table->flag_finished_meal);
+			}
+		}
 	}
 }
 
 static void	sleeping(t_philosophe *philo)
 {
-	philo->state = SLEEPING;
-	if (!philo->table->a_philo_is_dead)
+	if (philo->state != DEAD && !philo->stop)
+	{
+		philo->state = SLEEPING;
 		print_philo(split_time(philo->birthday),
 			philo->num, "\033[34m is sleeping\033[0m\n", philo);
-	usleep(philo->table->t_sleep * 1000);
+		usleep(philo->table->t_sleep * 1000);
+	}
 }
 
 static void	thinking(t_philosophe *philo)
 {
-	philo->state = THINKING;
-	if (!philo->table->a_philo_is_dead)
+	if (philo->state != DEAD && !philo->stop)
+	{
+		philo->state = THINKING;
 		print_philo(split_time(philo->birthday),
 			philo->num, "\033[36m is thinking\033[0m\n", philo);
+	}
 }
 
 void	*routine(void *data)
@@ -89,7 +99,7 @@ void	*routine(void *data)
 		return ((void *)1);
 	}
 	pthread_detach(death_control);
-	while (philo->state != DEAD && !philo->table->a_philo_is_dead
+	while (philo->state != DEAD && !philo->stop
 		&& philo->meal_taken < philo->table->nb_meal)
 	{
 		eating(philo);
